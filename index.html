@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Companion</title>
+  </head>
+  <body>
+    <div id="stage"></div>
+
+    <div id="content" data-layout="none">
+      <div id="cards"></div>
+      <div id="sketch-slot"><div class="sketch-title" id="sketch-title"></div></div>
+    </div>
+
+    <div id="topbar">
+      <button id="cam-chip" type="button" class="off" title="Turn the camera on or off">
+        <span class="dot"></span><span id="cam-label">Camera off</span>
+      </button>
+      <button id="people-btn" type="button" title="Who I know">People</button>
+      <button id="lists-btn" type="button" title="Messages and shared lists">Board</button>
+      <button id="voice-btn" type="button" title="Choose my name and voice">Voice</button>
+      <button id="hf-btn" type="button" title="Listen for my name, no button needed">Hands-free</button>
+    </div>
+
+    <div id="timers" aria-live="polite"></div>
+    <div id="music" hidden>
+      <div id="music-yt" aria-label="Music player"></div>
+      <div id="music-bar">
+        <span id="music-title"></span>
+        <button id="music-prev" type="button" aria-label="Previous">⏮</button>
+        <button id="music-play" type="button" aria-label="Pause">⏸</button>
+        <button id="music-next" type="button" aria-label="Next">⏭</button>
+        <input id="music-vol" type="range" min="0" max="100" aria-label="Music volume" />
+        <button id="music-eye" type="button" aria-label="Show or hide the video" title="Show or hide the video">▣</button>
+        <button id="music-stop" type="button" aria-label="Stop music">✕</button>
+      </div>
+    </div>
+    <div id="alarm" hidden></div>
+
+    <div id="cam-preview" hidden>
+      <video id="cam-video" playsinline muted></video>
+      <canvas id="cam-overlay"></canvas>
+    </div>
+
+    <div id="people-panel" hidden role="dialog" aria-label="People I know">
+      <div class="panel-card">
+        <h3>People I know</h3>
+        <p class="panel-note">Faces are stored on this computer only, as numbers, not photos. You can remove anyone here at any time.</p>
+        <div id="people-list"></div>
+        <div class="mem-row"><span class="panel-note" id="mem-note">I keep a private memory of our past chats on this computer so I feel like the same me each time.</span><button type="button" id="mem-clear" class="danger">Forget our past chats</button></div>
+        <label class="check">Say hi again only after I have been away for <select id="greet-after"><option value="2">2 min</option><option value="5">5 min</option><option value="10">10 min</option><option value="12">12 min</option><option value="15">15 min</option><option value="30">30 min</option><option value="60">1 hour</option></select></label>
+        <label class="check"><input type="checkbox" id="react-toggle" /> Comment out loud on how I look (smiling, sad…). Otherwise only the eyes react.</label>
+        <label class="check"><input type="checkbox" id="preview-toggle" /> Show the camera preview with face boxes</label>
+        <div class="panel-actions">
+          <button type="button" id="people-add" class="ghost">Teach me a new face</button>
+          <button type="button" id="people-close" class="primary">Done</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="voice-panel" hidden role="dialog" aria-label="Choose a voice">
+      <div class="panel-card">
+        <h3>My name and voice</h3>
+        <form id="name-form" class="list-add" autocomplete="off">
+          <input id="name-input" type="text" placeholder="My name (say &quot;Hey …&quot; to me)" maxlength="30" />
+          <button type="submit" class="primary">Save</button>
+        </form>
+        <p class="panel-note">Pick any voice on your ElevenLabs account. I'll say a line so you can hear it.</p>
+        <select id="voice-select" aria-label="Voice"></select>
+        <div id="voice-msg" class="panel-note"></div>
+        <form id="voice-custom" class="list-add" autocomplete="off">
+          <input id="voice-custom-id" type="text" placeholder="Or paste a voice ID" maxlength="40" />
+          <button type="submit" class="primary">Use</button>
+        </form>
+        <h3 class="sub">Speech recognition</h3>
+        <p class="panel-note">Tick the languages you speak here. With one ticked I always listen for that language; with several I work out which one it is, and try each of them when I'm not sure. Words below, plus names, lists and the board, help me hear them correctly.</p>
+        <div class="langs">
+          <label class="check small"><input type="checkbox" data-lang="eng" /> English</label>
+          <label class="check small"><input type="checkbox" data-lang="swe" /> Svenska</label>
+          <label class="check small"><input type="checkbox" data-lang="rus" /> Русский</label>
+          <label class="check small"><input type="checkbox" data-lang="fin" /> Suomi</label>
+        </div>
+        <input id="vocab-input" type="text" class="wide" placeholder="Words I often mishear (comma separated): havregryn, kaurahiutaleet, Kristina…" maxlength="400" />
+        <h3 class="sub">Hands-free</h3>
+        <p class="panel-note">Turn on <b>Hands-free</b> in the top bar and just say my name (add "hey" if you like), then your request. Right after I answer you can keep talking for a few seconds without saying it. Automatic uses the wake word model on this computer when there is one: it listens for the name in real time and nothing is uploaded until it has heard it. Otherwise it uses your browser's own speech service (Chrome and Edge send audio to their cloud for it, Safari uses Apple's) and switches to ElevenLabs if that isn't reachable, for example in Brave or the desktop app. With ElevenLabs, only short clips of someone speaking are sent, and it pauses if the room is noisy. It is off until you switch it on, and I ignore everything while I'm talking.</p>
+        <div class="list-add">
+          <select id="listen-engine" aria-label="What does the listening">
+            <option value="auto">Listen: automatic</option>
+            <option value="ondevice">On this computer (fastest, free)</option>
+            <option value="browser">Browser speech (free)</option>
+            <option value="elevenlabs">ElevenLabs (uses credit)</option>
+          </select>
+        </div>
+        <div class="list-add">
+          <select id="wake-model" aria-label="Wake word model"></select>
+          <select id="wake-sens" aria-label="Wake word sensitivity">
+            <option value="0.7">Strict</option>
+            <option value="0.5">Normal</option>
+            <option value="0.35">Sensitive</option>
+          </select>
+        </div>
+        <div class="list-add">
+          <select id="listen-lang" aria-label="Language I listen in">
+            <option value="en-US">Listen in English</option>
+            <option value="sv-SE">Lyssna på svenska</option>
+            <option value="ru-RU">Слушать по-русски</option>
+            <option value="fi-FI">Kuuntele suomeksi</option>
+          </select>
+          <input id="alias-input" type="text" placeholder="Also answer to (misheard spellings, comma separated)" maxlength="80" />
+        </div>
+        <div class="panel-actions"><button type="button" id="voice-close" class="primary">Done</button></div>
+      </div>
+    </div>
+
+    <div id="lists-panel" hidden role="dialog" aria-label="Shared lists">
+      <div class="panel-card">
+        <h3>Board</h3>
+        <h4 class="sub">Messages</h4>
+        <p class="panel-note">Say "say hello to Kristina" or "tell Kim dinner is at six". I pass it on when I see that person, then tick it off.</p>
+        <div id="board-body"></div>
+        <form id="board-new" class="list-add" autocomplete="off">
+          <input id="board-to" type="text" placeholder="For…" maxlength="30" />
+          <input id="board-text" type="text" placeholder="Say hello, dinner is at six…" maxlength="200" />
+          <label class="check small"><input type="checkbox" id="board-private" /> private</label>
+          <button type="submit" class="primary">Leave</button>
+        </form>
+        <h4 class="sub">Shared lists</h4>
+        <p class="panel-note">Ask me to add or remove things, or edit them here. Everyone in the house sees the same lists.</p>
+        <div id="lists-body"></div>
+        <form id="list-new" class="list-add" autocomplete="off">
+          <input id="list-new-name" type="text" placeholder="List (shopping, todo…)" value="shopping" maxlength="30" />
+          <input id="list-new-item" type="text" placeholder="Add an item…" maxlength="120" />
+          <button type="submit" class="primary">Add</button>
+        </form>
+        <div class="panel-actions"><button type="button" id="lists-close" class="primary">Done</button></div>
+      </div>
+    </div>
+
+    <div id="wake">Tap anywhere or press Space to wake me up</div>
+    <div id="badge" hidden></div>
+    <div id="toast" hidden></div>
+
+    <div id="dock">
+      <div id="caption" aria-live="polite"></div>
+      <form id="chat-form" autocomplete="off">
+        <button type="button" id="mic" aria-label="Hold to talk" title="Hold to talk (or hold Space)">
+          <svg viewBox="0 0 24 24" width="26" height="26" fill="currentColor" aria-hidden="true">
+            <path d="M12 15a3.5 3.5 0 0 0 3.5-3.5v-6a3.5 3.5 0 0 0-7 0v6A3.5 3.5 0 0 0 12 15Zm6-3.5a1 1 0 1 0-2 0 4 4 0 0 1-8 0 1 1 0 1 0-2 0 6 6 0 0 0 5 5.92V20H9a1 1 0 1 0 0 2h6a1 1 0 1 0 0-2h-2v-2.58A6 6 0 0 0 18 11.5Z" />
+          </svg>
+        </button>
+        <input id="text" type="text" placeholder="Type here, or hold Space to talk…" />
+        <button type="submit" id="send">Send</button>
+        <button type="button" id="skip" hidden title="Stop talking and let me speak">Skip ⏭</button>
+      </form>
+    </div>
+
+    <div id="debug" hidden></div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

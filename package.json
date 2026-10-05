@@ -1,0 +1,26 @@
+{
+  "name": "ai-companion",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently -k -n server,web -c cyan,magenta \"node --watch server/index.js\" \"vite\"",
+    "mock": "MOCK=1 npm run dev",
+    "build": "vite build",
+    "start": "vite build && node server/index.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.131.0",
+    "@mediapipe/hands": "^0.4.1675469240",
+    "@vladmandic/face-api": "^1.7.15",
+    "dotenv": "^18.0.5",
+    "express": "^5.2.1",
+    "onnxruntime-web": "^1.22.0",
+    "pixi.js": "^8.22.0",
+    "ws": "^8.22.0"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.5",
+    "vite": "^8.3.2"
+  }
+}
